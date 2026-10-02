@@ -14,6 +14,7 @@ const HealthForm = ({ user, onAnalysisComplete, onPredictionComplete }) => {
   // Report Upload State
   const [file, setFile] = useState(null);
   const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState('');
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -46,16 +47,20 @@ const HealthForm = ({ user, onAnalysisComplete, onPredictionComplete }) => {
 
   const handleFileUpload = async (e) => {
     e.preventDefault();
-    if (!file) return alert('Please select a file first');
+    if (!file) {
+      setUploadError('Choose a report file before starting the analysis.');
+      return;
+    }
 
+    setUploadError('');
     setUploading(true);
     try {
       const userId = user?.user_id || 'test_user_123';
       const results = await healthService.analyzeReport(userId, file);
       onAnalysisComplete(results);
     } catch (error) {
-      console.error('Upload error:', error);
-      alert('Error analyzing report. Please ensure the backend is running and you are logged in.');
+      const detail = error.response?.data?.detail;
+      setUploadError(typeof detail === 'string' ? detail : 'The report could not be analyzed. Check your connection and try again.');
     } finally {
       setUploading(false);
     }
@@ -124,18 +129,22 @@ const HealthForm = ({ user, onAnalysisComplete, onPredictionComplete }) => {
                 <div className="flex items-center space-x-4">
                   <input
                     type="file"
-                    accept=".pdf,image/*"
-                    onChange={(e) => setFile(e.target.files[0])}
+                    accept=".pdf,.png,.jpg,.jpeg"
+                    onChange={(e) => {
+                      setFile(e.target.files[0] || null);
+                      setUploadError('');
+                    }}
                     className="block w-full text-sm text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-white file:text-indigo-600 hover:file:bg-white/90 transition-all cursor-pointer"
                   />
                 </div>
                 <button
                   onClick={handleFileUpload}
-                  disabled={uploading}
+                  disabled={uploading || !file}
                   className="w-full bg-indigo-500 text-white py-3 rounded-xl font-bold shadow-lg hover:bg-indigo-600 active:scale-95 transition-all duration-200 disabled:opacity-70"
                 >
                   {uploading ? 'Analyzing Report...' : 'Upload & Analyze Report'}
                 </button>
+                {uploadError && <p className="form-error" role="alert">{uploadError}</p>}
               </div>
             </div>
           </div>

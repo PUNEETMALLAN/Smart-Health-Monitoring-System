@@ -60,6 +60,13 @@ class MemoryCollection:
             document[key] = value
         return type("UpdateResult", (), {"matched_count": 1, "modified_count": 1})()
 
+    async def delete_one(self, query):
+        for index, document in enumerate(self._documents):
+            if self._matches(document, query):
+                del self._documents[index]
+                return type("DeleteResult", (), {"deleted_count": 1})()
+        return type("DeleteResult", (), {"deleted_count": 0})()
+
     def find(self, query):
         docs = [doc for doc in self._documents if self._matches(doc, query)]
         return MemoryCursor(docs)

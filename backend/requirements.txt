@@ -1,0 +1,11 @@
+fastapi
+groq
+joblib
+motor
+numpy
+pydantic
+python-dotenv
+python-multipart
+pypdf>=5,<7
+scikit-learn
+uvicorn

@@ -11,18 +11,42 @@ export const healthService = {
     const response = await axios.post(`${API_BASE_URL}/register`, userData);
     return response.data;
   },
+  async verifyEmail(token) {
+    const response = await axios.post(`${API_BASE_URL}/verify-email`, { token });
+    return response.data;
+  },
+  async verifyEmailCode(email, code) {
+    const response = await axios.post(`${API_BASE_URL}/verify-email-code`, { email, code });
+    return response.data;
+  },
+  async resendVerification(usernameOrEmail) {
+    const response = await axios.post(`${API_BASE_URL}/resend-verification`, {
+      username_or_email: usernameOrEmail,
+    });
+    return response.data;
+  },
+  async forgotPassword(email) {
+    const response = await axios.post(`${API_BASE_URL}/forgot-password`, { email });
+    return response.data;
+  },
+  async resetPassword(token, password) {
+    const response = await axios.post(`${API_BASE_URL}/reset-password`, { token, password });
+    return response.data;
+  },
   async analyzeReport(userId, file) {
     const formData = new FormData();
     formData.append('user_id', userId);
     formData.append('file', file);
 
-    const response = await axios.post(`${API_BASE_URL}/analyze-report`, formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    });
+    const response = await axios.post(`${API_BASE_URL}/analyze-report`, formData);
     return response.data;
   },
   async predictRisk(data) {
     const response = await axios.post(`${API_BASE_URL}/predict`, data);
+    return response.data;
+  },
+  async chat(messages) {
+    const response = await axios.post(`${API_BASE_URL}/chat`, { messages });
     return response.data;
   },
   async saveHealthLog(userId, data) {
