@@ -2,13 +2,14 @@ import React, { useState } from 'react';
 import { healthService } from '../services/healthService';
 import RiskCard from './RiskCard';
 
-const HealthForm = ({ user, onAnalysisComplete }) => {
+const HealthForm = ({ user, onAnalysisComplete, onPredictionComplete }) => {
   const [formData, setFormData] = useState({
-    age: 30, gender: 0, systolic_bp: 120, diastolic_bp: 80,
-    blood_sugar: 90, bmi: 22.5, heart_rate: 72, smoking: 0, exercise: 1
+    age: '', gender: '', systolic_bp: '', diastolic_bp: '',
+    blood_sugar: '', bmi: '', heart_rate: '', smoking: '', exercise: ''
   });
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   // Report Upload State
   const [file, setFile] = useState(null);
@@ -16,18 +17,28 @@ const HealthForm = ({ user, onAnalysisComplete }) => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: name === 'bmi' ? parseFloat(value) : parseInt(value) }));
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
     setLoading(true);
     try {
-      const prediction = await healthService.predictRisk(formData);
+      const numericData = Object.fromEntries(
+        Object.entries(formData).map(([key, value]) => [key, key === 'bmi' ? parseFloat(value) : parseInt(value, 10)])
+      );
+      const prediction = await healthService.predictRisk(numericData);
       setResult(prediction);
-      await healthService.saveHealthLog(user?.user_id || 'guest', formData);
+      const timestamp = prediction.timestamp || new Date().toISOString();
+      onPredictionComplete({ data: numericData, prediction, timestamp });
+      try {
+        await healthService.saveHealthLog(user.user_id, numericData);
+      } catch (saveError) {
+        setError('Your prediction is ready, but the reading could not be saved. Please check your connection and try again.');
+      }
     } catch (error) {
-      alert('Error predicting risk. Please ensure the backend is running.');
+      setError(error.response?.data?.detail || 'Could not analyze your health details. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -65,44 +76,45 @@ const HealthForm = ({ user, onAnalysisComplete }) => {
               <div className="grid grid-cols-2 gap-4">
                 <div className="text-left">
                   <label className="block text-sm font-medium text-white mb-1 ml-1">Age</label>
-                  <input type="number" name="age" value={formData.age} onChange={handleChange} className="w-full p-2 bg-white/20 border border-white/30 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/50 transition-all" />
+                  <input type="number" name="age" min="18" max="120" required value={formData.age} onChange={handleChange} className="w-full p-2 bg-white/20 border border-white/30 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/50 transition-all" />
                 </div>
                 <div className="text-left">
                   <label className="block text-sm font-medium text-white mb-1 ml-1">Gender (0:M, 1:F)</label>
-                  <input type="number" name="gender" value={formData.gender} onChange={handleChange} className="w-full p-2 bg-white/20 border border-white/30 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/50 transition-all" />
+                  <input type="number" name="gender" min="0" max="1" required value={formData.gender} onChange={handleChange} className="w-full p-2 bg-white/20 border border-white/30 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/50 transition-all" />
                 </div>
                 <div className="text-left">
                   <label className="block text-sm font-medium text-white mb-1 ml-1">Systolic BP</label>
-                  <input type="number" name="systolic_bp" value={formData.systolic_bp} onChange={handleChange} className="w-full p-2 bg-white/20 border border-white/30 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/50 transition-all" />
+                  <input type="number" name="systolic_bp" min="70" max="250" required value={formData.systolic_bp} onChange={handleChange} className="w-full p-2 bg-white/20 border border-white/30 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/50 transition-all" />
                 </div>
                 <div className="text-left">
                   <label className="block text-sm font-medium text-white mb-1 ml-1">Diastolic BP</label>
-                  <input type="number" name="diastolic_bp" value={formData.diastolic_bp} onChange={handleChange} className="w-full p-2 bg-white/20 border border-white/30 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/50 transition-all" />
+                  <input type="number" name="diastolic_bp" min="40" max="150" required value={formData.diastolic_bp} onChange={handleChange} className="w-full p-2 bg-white/20 border border-white/30 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/50 transition-all" />
                 </div>
                 <div className="text-left">
                   <label className="block text-sm font-medium text-white mb-1 ml-1">Blood Sugar</label>
-                  <input type="number" name="blood_sugar" value={formData.blood_sugar} onChange={handleChange} className="w-full p-2 bg-white/20 border border-white/30 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/50 transition-all" />
+                  <input type="number" name="blood_sugar" min="40" max="500" required value={formData.blood_sugar} onChange={handleChange} className="w-full p-2 bg-white/20 border border-white/30 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/50 transition-all" />
                 </div>
                 <div className="text-left">
                   <label className="block text-sm font-medium text-white mb-1 ml-1">BMI</label>
-                  <input type="number" step="0.1" name="bmi" value={formData.bmi} onChange={handleChange} className="w-full p-2 bg-white/20 border border-white/30 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/50 transition-all" />
+                  <input type="number" step="0.1" name="bmi" min="10" max="60" required value={formData.bmi} onChange={handleChange} className="w-full p-2 bg-white/20 border border-white/30 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/50 transition-all" />
                 </div>
                 <div className="text-left">
                   <label className="block text-sm font-medium text-white mb-1 ml-1">Heart Rate</label>
-                  <input type="number" name="heart_rate" value={formData.heart_rate} onChange={handleChange} className="w-full p-2 bg-white/20 border border-white/30 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/50 transition-all" />
+                  <input type="number" name="heart_rate" min="30" max="220" required value={formData.heart_rate} onChange={handleChange} className="w-full p-2 bg-white/20 border border-white/30 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/50 transition-all" />
                 </div>
                 <div className="text-left">
                   <label className="block text-sm font-medium text-white mb-1 ml-1">Smoking (0:N, 1:Y)</label>
-                  <input type="number" name="smoking" value={formData.smoking} onChange={handleChange} className="w-full p-2 bg-white/20 border border-white/30 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/50 transition-all" />
+                  <input type="number" name="smoking" min="0" max="1" required value={formData.smoking} onChange={handleChange} className="w-full p-2 bg-white/20 border border-white/30 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/50 transition-all" />
                 </div>
                 <div className="text-left">
                   <label className="block text-sm font-medium text-white mb-1 ml-1">Exercise (0:N, 1:Y)</label>
-                  <input type="number" name="exercise" value={formData.exercise} onChange={handleChange} className="w-full p-2 bg-white/20 border border-white/30 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/50 transition-all" />
+                  <input type="number" name="exercise" min="0" max="1" required value={formData.exercise} onChange={handleChange} className="w-full p-2 bg-white/20 border border-white/30 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/50 transition-all" />
                 </div>
               </div>
               <button type="submit" disabled={loading} className="w-full bg-white text-indigo-600 py-3 rounded-xl font-bold shadow-lg hover:bg-white/90 active:scale-95 transition-all duration-200">
                 {loading ? 'Analyzing...' : 'Analyze Health Risk'}
               </button>
+              {error && <p className="form-error" role="alert">{error}</p>}
             </form>
 
             {/* Report Upload integrated into the same card */}

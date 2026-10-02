@@ -65,6 +65,11 @@ class RegisterRequest(BaseModel):
     username: str
     password: str
     name: str
+    age: int = Field(..., ge=18, le=120)
+    gender: int = Field(..., ge=0, le=1)
+    height_cm: Optional[float] = Field(None, ge=50, le=260)
+    weight_kg: Optional[float] = Field(None, ge=20, le=500)
+    blood_group: Optional[str] = Field(None, pattern=r"^(A|B|AB|O)[+-]$")
 
 class PredictionResponse(BaseModel):
     risk_level: str
@@ -99,7 +104,16 @@ async def root():
 async def login(request: LoginRequest):
     user = await user_collection.find_one({"username": request.username})
     if user and user.get("password") == request.password:
-        return {"user_id": str(user["_id"]), "name": user.get("name", request.username), "status": "success"}
+        return {
+            "user_id": str(user["_id"]),
+            "name": user.get("name", request.username),
+            "age": user.get("age"),
+            "gender": user.get("gender"),
+            "height_cm": user.get("height_cm"),
+            "weight_kg": user.get("weight_kg"),
+            "blood_group": user.get("blood_group"),
+            "status": "success",
+        }
     if request.username == "admin" and request.password == "admin":
         return {"user_id": "admin_123", "name": "Administrator", "status": "success"}
     elif request.username == "user" and request.password == "password":
@@ -115,6 +129,11 @@ async def register(request: RegisterRequest):
         "username": request.username,
         "password": request.password,
         "name": request.name,
+        "age": request.age,
+        "gender": request.gender,
+        "height_cm": request.height_cm,
+        "weight_kg": request.weight_kg,
+        "blood_group": request.blood_group,
         "created_at": datetime.now().isoformat()
     }
     result = await user_collection.insert_one(user_doc)

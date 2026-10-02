@@ -6,7 +6,12 @@ const Login = ({ onLogin }) => {
   const [formData, setFormData] = useState({
     username: '',
     password: '',
-    name: ''
+    name: '',
+    age: '',
+    gender: '',
+    height_cm: '',
+    weight_kg: '',
+    blood_group: '',
   });
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -19,19 +24,26 @@ const Login = ({ onLogin }) => {
     e.preventDefault();
     setError('');
     setIsLoading(true);
+
     try {
       if (isRegistering) {
         await healthService.register({
           username: formData.username,
           password: formData.password,
-          name: formData.name
+          name: formData.name,
+          age: Number(formData.age),
+          gender: Number(formData.gender),
+          height_cm: formData.height_cm ? Number(formData.height_cm) : null,
+          weight_kg: formData.weight_kg ? Number(formData.weight_kg) : null,
+          blood_group: formData.blood_group || null,
         });
         setError('Account created! Please log in.');
         setIsRegistering(false);
+        setFormData((current) => ({ ...current, password: '' }));
       } else {
         const userData = await healthService.login({
           username: formData.username,
-          password: formData.password
+          password: formData.password,
         });
         onLogin(userData);
       }
@@ -43,88 +55,81 @@ const Login = ({ onLogin }) => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden bg-gradient-to-br from-blue-600 via-purple-600 to-pink-500">
-      {/* Decorative blobs for the glass effect to pop */}
-      <div className="absolute top-[-10%] left-[-10%] w-72 h-72 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob"></div>
-      <div className="absolute bottom-[-10%] right-[-10%] w-72 h-72 bg-pink-500 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-2000"></div>
-
-      <div className="w-full max-w-md z-10">
-        <div className="bg-white/30 backdrop-blur-lg border border-white/20 shadow-2xl rounded-3xl p-8 text-center">
-          <div className="mb-8">
-            <h1 className="text-4xl font-bold text-white mb-2 drop-shadow-sm">
-              {isRegistering ? 'Create Account' : 'Welcome Back'}
-            </h1>
-            <p className="text-white/90">
-              {isRegistering ? 'Join us for better health tracking' : 'Please enter your details to continue'}
-            </p>
+    <div className="login-page">
+      <div className="login-wrap">
+        <div className="login-card login-brand-card">
+          <div className="panel-row title-row small-gap">
+            <div className="panel-icon">❤</div>
+            <div>
+              <strong>Smart Health</strong>
+              <small>Your Health, Our Priority</small>
+            </div>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="login-welcome">
+            <h1>{isRegistering ? 'Create Account' : 'Welcome Back'}</h1>
+            <p>{isRegistering ? 'Create your account to continue.' : 'Sign in to access your dashboard.'}</p>
+          </div>
+
+          <form className="field-group" onSubmit={handleSubmit}>
             {isRegistering && (
-              <div className="text-left">
-                <label className="block text-white text-sm font-semibold mb-2 ml-1">Full Name</label>
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-3 rounded-xl bg-white/40 border border-white/40 text-indigo-900 placeholder-indigo-700/60 focus:outline-none focus:ring-2 focus:ring-white/50 transition-all font-medium"
-                  placeholder="John Doe"
-                  required
-                />
-              </div>
-            )}
-            <div className="text-left">
-              <label className="block text-white text-sm font-semibold mb-2 ml-1">Username</label>
-              <input
-                type="text"
-                name="username"
-                value={formData.username}
-                onChange={handleInputChange}
-                className="w-full px-4 py-3 rounded-xl bg-white/40 border border-white/40 text-indigo-900 placeholder-indigo-700/60 focus:outline-none focus:ring-2 focus:ring-white/50 transition-all font-medium"
-                placeholder="admin"
-                required
-              />
-            </div>
-            <div className="text-left">
-              <label className="block text-white text-sm font-semibold mb-2 ml-1">Password</label>
-              <input
-                type="password"
-                name="password"
-                value={formData.password}
-                onChange={handleInputChange}
-                className="w-full px-4 py-3 rounded-xl bg-white/40 border border-white/40 text-indigo-900 placeholder-indigo-700/60 focus:outline-none focus:ring-2 focus:ring-white/50 transition-all font-medium"
-                placeholder="password"
-                required
-              />
-            </div>
-
-            {error && (
-              <div className={`py-2 px-4 rounded-lg text-sm ${error.includes('created') ? 'bg-green-500/40 text-white border border-green-400/50' : 'bg-red-500/40 backdrop-blur-md border border-red-400/50 text-white'}`}>
-                {error}
-              </div>
+              <>
+                <label>
+                  <span>Full Name</span>
+                  <input type="text" name="name" placeholder="John Doe" value={formData.name} onChange={handleInputChange} required />
+                </label>
+                <div className="registration-fields">
+                  <label>
+                    <span>Age</span>
+                    <input type="number" name="age" min="18" max="120" placeholder="Age" value={formData.age} onChange={handleInputChange} required />
+                  </label>
+                  <label>
+                    <span>Gender</span>
+                    <select name="gender" value={formData.gender} onChange={handleInputChange} required>
+                      <option value="" disabled>Select</option>
+                      <option value="0">Male</option>
+                      <option value="1">Female</option>
+                    </select>
+                  </label>
+                  <label>
+                    <span>Height (cm) <small>Optional</small></span>
+                    <input type="number" name="height_cm" min="50" max="260" step="0.1" placeholder="e.g. 170" value={formData.height_cm} onChange={handleInputChange} />
+                  </label>
+                  <label>
+                    <span>Weight (kg) <small>Optional</small></span>
+                    <input type="number" name="weight_kg" min="20" max="500" step="0.1" placeholder="e.g. 65" value={formData.weight_kg} onChange={handleInputChange} />
+                  </label>
+                  <label className="registration-blood-group">
+                    <span>Blood Group <small>Optional</small></span>
+                    <select name="blood_group" value={formData.blood_group} onChange={handleInputChange}>
+                      <option value="">Prefer not to say</option>
+                      {['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].map((group) => <option key={group} value={group}>{group}</option>)}
+                    </select>
+                  </label>
+                </div>
+              </>
             )}
 
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full py-3 px-4 bg-white text-indigo-600 font-bold rounded-xl shadow-lg hover:bg-white/90 active:scale-95 transition-all duration-200 disabled:opacity-70"
-            >
+            <label>
+              <span>Email or Username</span>
+              <input type="text" name="username" placeholder="admin" value={formData.username} onChange={handleInputChange} required />
+            </label>
+
+            <label>
+              <span>Password</span>
+              <input type="password" name="password" placeholder="password" value={formData.password} onChange={handleInputChange} required />
+            </label>
+
+            {error && <div className={`message ${error.includes('created') ? 'success' : 'error'}`}>{error}</div>}
+
+            <button type="submit" className="login-btn" disabled={isLoading}>
               {isLoading ? 'Processing...' : isRegistering ? 'Create Account' : 'Sign In'}
             </button>
           </form>
 
-          <div className="mt-6">
-            <button
-              onClick={() => {
-                setIsRegistering(!isRegistering);
-                setError('');
-              }}
-              className="text-white/80 hover:text-white text-sm underline underline-offset-4 transition-all"
-            >
-              {isRegistering ? 'Already have an account? Sign In' : "Don't have an account? Register here"}
-            </button>
-          </div>
+          <button className="toggle-btn" onClick={() => { setIsRegistering(!isRegistering); setError(''); }}>
+            {isRegistering ? 'Already have an account? Sign In' : "Don't have an account? Register here"}
+          </button>
         </div>
       </div>
     </div>
