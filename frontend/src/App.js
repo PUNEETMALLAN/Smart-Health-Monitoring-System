@@ -1,12 +1,14 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Login from './pages/Login';
 import HealthForm from './components/HealthForm';
+import ImageScreening from './components/ImageScreening';
 import { healthService } from './services/healthService';
 
 const navItems = [
   { key: 'dashboard', icon: '◫', label: 'Dashboard' },
   { key: 'history', icon: '📈', label: 'Health History' },
   { key: 'prediction', icon: '🧠', label: 'AI Prediction' },
+  { key: 'image-screening', icon: '🩻', label: 'Image Screening' },
   { key: 'assistant', icon: '🤖', label: 'Chatbot' },
   { key: 'alerts', icon: '🔔', label: 'Alerts' },
   { key: 'reports', icon: '🧾', label: 'Reports' },
@@ -17,6 +19,7 @@ const pageCopy = {
   dashboard: ['', 'Your health overview for today.'],
   history: ['Health History', 'Review your recent health readings.'],
   prediction: ['AI Prediction', 'Enter your health data for a risk assessment.'],
+  'image-screening': ['Image Screening', 'Review an image and find safe next steps.'],
   assistant: ['Health Chatbot', 'Ask questions about your health and wellness.'],
   alerts: ['Alerts & Notifications', 'Stay informed about your health.'],
   reports: ['Health Reports', 'Your health summaries and assessments.'],
@@ -452,6 +455,8 @@ function App() {
               </button>
             </form>
           </section>}
+
+          {view === 'image-screening' && <ImageScreening />}
 
           {view === 'history' && <section className="glass-panel dashboard-card history-card">
             <div className="panel-row between">
