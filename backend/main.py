@@ -22,6 +22,12 @@ from groq import Groq
 import os
 from dotenv import load_dotenv
 from pypdf import PdfReader
+from ml.skin_screening import InvalidSkinImage, SkinModelNotConfigured, screen_skin_image
+from ml.fracture_screening import (
+    FractureModelNotConfigured,
+    InvalidXrayImage,
+    screen_bone_xray,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -45,6 +51,8 @@ EMAIL_VERIFICATION_CODE_TTL_MINUTES = 10
 EMAIL_VERIFICATION_RESEND_WAIT_SECONDS = 60
 EMAIL_VERIFICATION_MAX_ATTEMPTS = 5
 MAX_REPORT_BYTES = 10 * 1024 * 1024
+MAX_SKIN_IMAGE_BYTES = 10 * 1024 * 1024
+MAX_XRAY_IMAGE_BYTES = 10 * 1024 * 1024
 MAX_PDF_PAGES = 20
 MAX_PDF_TEXT_LENGTH = 30000
 
@@ -620,6 +628,36 @@ async def analyze_report(file: UploadFile = File(...), user_id: str = Form(None)
         "analyzed_at": datetime.now().isoformat(),
         **analysis,
     }
+
+@app.post("/screen-skin-image")
+async def screen_skin_image_endpoint(file: UploadFile = File(...)):
+    image_bytes = await file.read(MAX_SKIN_IMAGE_BYTES + 1)
+    if len(image_bytes) > MAX_SKIN_IMAGE_BYTES:
+        raise HTTPException(status_code=413, detail="The image is too large. Maximum size is 10 MB.")
+    if not image_bytes:
+        raise HTTPException(status_code=400, detail="The uploaded image is empty.")
+
+    try:
+        return await asyncio.to_thread(screen_skin_image, image_bytes)
+    except InvalidSkinImage as error:
+        raise HTTPException(status_code=400, detail=str(error)) from error
+    except SkinModelNotConfigured as error:
+        raise HTTPException(status_code=503, detail=str(error)) from error
+
+@app.post("/screen-bone-xray")
+async def screen_bone_xray_endpoint(file: UploadFile = File(...)):
+    image_bytes = await file.read(MAX_XRAY_IMAGE_BYTES + 1)
+    if len(image_bytes) > MAX_XRAY_IMAGE_BYTES:
+        raise HTTPException(status_code=413, detail="The image is too large. Maximum size is 10 MB.")
+    if not image_bytes:
+        raise HTTPException(status_code=400, detail="The uploaded image is empty.")
+
+    try:
+        return await asyncio.to_thread(screen_bone_xray, image_bytes)
+    except InvalidXrayImage as error:
+        raise HTTPException(status_code=400, detail=str(error)) from error
+    except FractureModelNotConfigured as error:
+        raise HTTPException(status_code=503, detail=str(error)) from error
 
 @app.post("/predict", response_model=PredictionResponse)
 async def predict_risk(data: HealthData):

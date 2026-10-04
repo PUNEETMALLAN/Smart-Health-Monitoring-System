@@ -8,4 +8,6 @@ python-dotenv
 python-multipart
 pypdf>=5,<7
 scikit-learn
+scikit-image
+Pillow
 uvicorn

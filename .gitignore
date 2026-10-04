@@ -10,6 +10,7 @@ __pycache__/
 **/__pycache__/
 *.py[cod]
 *.log
+ml/artifacts/
 .env
 .env.*
 !.env.example

@@ -41,6 +41,20 @@ export const healthService = {
     const response = await axios.post(`${API_BASE_URL}/analyze-report`, formData);
     return response.data;
   },
+  async screenSkinImage(file) {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const response = await axios.post(`${API_BASE_URL}/screen-skin-image`, formData);
+    return response.data;
+  },
+  async screenBoneXray(file) {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const response = await axios.post(`${API_BASE_URL}/screen-bone-xray`, formData);
+    return response.data;
+  },
   async predictRisk(data) {
     const response = await axios.post(`${API_BASE_URL}/predict`, data);
     return response.data;
