@@ -346,6 +346,7 @@ async def register(request: RegisterRequest):
         "height_cm": request.height_cm,
         "weight_kg": request.weight_kg,
         "blood_group": request.blood_group,
+        "avatar_id": "avatar_2" if request.gender == 0 else "avatar_1",
         "email_verified": False,
         "email_verification_code_hash": _email_code_hash(email, verification_code),
         "email_verification_code_expires_at": (
@@ -706,6 +707,16 @@ async def update_profile(profile: ProfileUpdateRequest):
         include={"name", "age", "gender", "height_cm", "weight_kg", "blood_group", "avatar_id"}
     )
     updated_fields["name"] = profile.name.strip()
+    avatar_gender = {
+        "avatar_1": 1,
+        "avatar_2": 0,
+        "avatar_3": 1,
+        "avatar_4": 0,
+        "avatar_5": 1,
+        "avatar_6": 0,
+    }
+    if avatar_gender.get(updated_fields["avatar_id"]) != profile.gender:
+        updated_fields["avatar_id"] = "avatar_2" if profile.gender == 0 else "avatar_1"
     if account is not None:
         profile_update: dict[str, Any] = {"$set": updated_fields}
         if not account["password"].startswith("pbkdf2_sha256$"):

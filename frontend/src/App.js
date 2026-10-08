@@ -5,15 +5,78 @@ import ImageScreening from './components/ImageScreening';
 import { healthService } from './services/healthService';
 
 const navItems = [
-  { key: 'dashboard', icon: '◫', label: 'Dashboard' },
-  { key: 'history', icon: '📈', label: 'Health History' },
-  { key: 'prediction', icon: '🧠', label: 'AI Prediction' },
-  { key: 'image-screening', icon: '🩻', label: 'Image Screening' },
-  { key: 'assistant', icon: '🤖', label: 'Chatbot' },
-  { key: 'alerts', icon: '🔔', label: 'Alerts' },
-  { key: 'reports', icon: '🧾', label: 'Reports' },
-  { key: 'profile', icon: '👤', label: 'Profile' },
+  { key: 'dashboard', icon: 'dashboard', label: 'Dashboard' },
+  { key: 'history', icon: 'history', label: 'Health History' },
+  { key: 'prediction', icon: 'prediction', label: 'AI Prediction' },
+  { key: 'image-screening', icon: 'screening', label: 'Image Screening' },
+  { key: 'assistant', icon: 'assistant', label: 'Chatbot' },
+  { key: 'reports', icon: 'reports', label: 'Reports' },
+  { key: 'profile', icon: 'profile', label: 'Profile' },
 ];
+
+const DockIcon = ({ name }) => {
+  const sharedProps = {
+    fill: 'none',
+    stroke: 'currentColor',
+    strokeWidth: 1.8,
+    strokeLinecap: 'round',
+    strokeLinejoin: 'round',
+  };
+
+  const shapes = {
+    dashboard: (
+      <g {...sharedProps}>
+        <rect x="3.5" y="3.5" width="7" height="7" rx="1.5" />
+        <rect x="13.5" y="3.5" width="7" height="7" rx="1.5" />
+        <rect x="3.5" y="13.5" width="7" height="7" rx="1.5" />
+        <rect x="13.5" y="13.5" width="7" height="7" rx="1.5" />
+      </g>
+    ),
+    history: (
+      <g {...sharedProps}>
+        <path d="M4 19.5h16M4.5 18V5" />
+        <path d="m6.5 15 4-4 3 2 5-6" />
+        <path d="M15.5 7H19v3.5" />
+      </g>
+    ),
+    prediction: (
+      <g {...sharedProps}>
+        <path d="M12 3.5v4M12 16.5v4M3.5 12h4M16.5 12h4M6 6l2.8 2.8m6.4 6.4L18 18m0-12-2.8 2.8m-6.4 6.4L6 18" />
+        <circle cx="12" cy="12" r="3.5" />
+      </g>
+    ),
+    screening: (
+      <g {...sharedProps}>
+        <rect x="3.5" y="4" width="17" height="16" rx="2.5" />
+        <path d="M12 8v8M8 12h8" />
+      </g>
+    ),
+    assistant: (
+      <g {...sharedProps}>
+        <path d="M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v8a2.5 2.5 0 0 1-2.5 2.5H11l-4.5 4v-4A2.5 2.5 0 0 1 4 13.5z" />
+        <path d="M8 8.5h8M8 12h5" />
+      </g>
+    ),
+    reports: (
+      <g {...sharedProps}>
+        <path d="M7 3.5h7l4.5 4.5v12A1.5 1.5 0 0 1 17 21.5H7A1.5 1.5 0 0 1 5.5 20V5A1.5 1.5 0 0 1 7 3.5Z" />
+        <path d="M14 3.5V8h4.5M8.5 12h7M8.5 15.5h7M8.5 19h4" />
+      </g>
+    ),
+    profile: (
+      <g {...sharedProps}>
+        <circle cx="12" cy="8" r="3.5" />
+        <path d="M5 20a7 7 0 0 1 14 0" />
+      </g>
+    ),
+  };
+
+  return (
+    <svg className="dock-icon" viewBox="0 0 24 24" aria-hidden="true">
+      {shapes[name]}
+    </svg>
+  );
+};
 
 const pageCopy = {
   dashboard: ['', 'Your health overview for today.'],
@@ -21,21 +84,30 @@ const pageCopy = {
   prediction: ['AI Prediction', 'Enter your health data for a risk assessment.'],
   'image-screening': ['Image Screening', 'Review an image and find safe next steps.'],
   assistant: ['Health Chatbot', 'Ask questions about your health and wellness.'],
-  alerts: ['Alerts & Notifications', 'Stay informed about your health.'],
   reports: ['Health Reports', 'Your health summaries and assessments.'],
   profile: ['Your Profile', 'Manage your personal health information.'],
 };
 
 const profileAvatars = [
-  { id: 'avatar_1', emoji: '👩🏻', label: 'Ava' },
-  { id: 'avatar_2', emoji: '👨🏽', label: 'Noah' },
-  { id: 'avatar_3', emoji: '👩🏽', label: 'Mia' },
-  { id: 'avatar_4', emoji: '👨🏻', label: 'Leo' },
-  { id: 'avatar_5', emoji: '👩🏿', label: 'Zuri' },
-  { id: 'avatar_6', emoji: '👨🏿', label: 'Kai' },
+  { id: 'avatar_1', emoji: '👩🏻', label: 'Ava', gender: 1 },
+  { id: 'avatar_2', emoji: '👨🏽', label: 'Noah', gender: 0 },
+  { id: 'avatar_3', emoji: '👩🏽', label: 'Mia', gender: 1 },
+  { id: 'avatar_4', emoji: '👨🏻', label: 'Leo', gender: 0 },
+  { id: 'avatar_5', emoji: '👩🏿', label: 'Zuri', gender: 1 },
+  { id: 'avatar_6', emoji: '👨🏿', label: 'Kai', gender: 0 },
 ];
 
-const getProfileAvatar = (avatarId) => profileAvatars.find((avatar) => avatar.id === avatarId) || profileAvatars[0];
+const getDefaultProfileAvatar = (gender) => (
+  profileAvatars.find((avatar) => avatar.gender === Number(gender)) || profileAvatars[0]
+);
+
+const getProfileAvatar = (avatarId, gender) => {
+  const avatar = profileAvatars.find((option) => option.id === avatarId);
+  if (avatar && (gender === undefined || gender === null || avatar.gender === Number(gender))) {
+    return avatar;
+  }
+  return getDefaultProfileAvatar(gender);
+};
 
 const getTimeGreeting = () => {
   const hour = new Date().getHours();
@@ -75,7 +147,7 @@ function App() {
     height_cm: '',
     weight_kg: '',
     blood_group: '',
-    avatar_id: profileAvatars[0].id,
+    avatar_id: getDefaultProfileAvatar(user?.gender).id,
   });
 
   useEffect(() => {
@@ -193,7 +265,7 @@ function App() {
       height_cm: user?.height_cm ?? '',
       weight_kg: user?.weight_kg ?? '',
       blood_group: user?.blood_group || '',
-      avatar_id: user?.avatar_id || profileAvatars[0].id,
+      avatar_id: getProfileAvatar(user?.avatar_id, user?.gender).id,
     });
     setProfileError('');
     setProfileNotice('');
@@ -234,7 +306,16 @@ function App() {
 
   const handleProfileFieldChange = (event) => {
     const { name, value } = event.target;
-    setProfileForm((current) => ({ ...current, [name]: value }));
+    setProfileForm((current) => {
+      if (name !== 'gender') {
+        return { ...current, [name]: value };
+      }
+      return {
+        ...current,
+        gender: value,
+        avatar_id: getDefaultProfileAvatar(value).id,
+      };
+    });
   };
 
   const filteredHealthHistory = [...healthHistory]
@@ -268,10 +349,11 @@ function App() {
               <button
                 key={item.key}
                 className={`nav-item ${view === item.key ? 'active' : ''}`}
+                aria-label={item.label}
+                data-label={item.label}
                 onClick={() => setView(item.key)}
               >
-                <span>{item.icon}</span>
-                <span>{item.label}</span>
+                <span><DockIcon name={item.icon} /></span>
               </button>
             ))}
           </div>
@@ -279,7 +361,7 @@ function App() {
 
       </aside>
 
-      <div className="content-panel">
+      <div className={`content-panel ${view === 'prediction' ? 'prediction-layout' : ''}`}>
         <header className="topbar glass-panel">
           <div>
             <h2>
@@ -310,8 +392,8 @@ function App() {
               <p>{user?.name || 'John Doe'}</p>
               <small>Premium User</small>
             </div>
-            <div className="top-avatar" aria-label={`${getProfileAvatar(user?.avatar_id).label} profile picture`}>
-              {getProfileAvatar(user?.avatar_id).emoji}
+            <div className="top-avatar" aria-label={`${getProfileAvatar(user?.avatar_id, user?.gender).label} profile picture`}>
+              {getProfileAvatar(user?.avatar_id, user?.gender).emoji}
             </div>
           </div>
         </header>
@@ -479,19 +561,6 @@ function App() {
             {healthHistory.length > 0 && filteredHealthHistory.length === 0 && <EmptyState>No health history matches “{historySearch}”.</EmptyState>}
           </section>}
 
-          {view === 'alerts' && <section className="glass-panel dashboard-card card-span-2 alerts-page-card">
-            <div className="panel-row between">
-              <div>
-                <span className="panel-icon small">⚑</span>
-                <strong>Alerts & Notifications</strong>
-              </div>
-            </div>
-            {latestPrediction ? <div className="alert-list">
-              <div className={`alert-item ${latestPrediction.prediction.risk_score === 2 ? 'danger' : 'normal'}`}><span>•</span> Latest assessment: {latestPrediction.prediction.risk_level}</div>
-              {latestPrediction.prediction.recommendations.map((recommendation) => <div className="alert-item normal" key={recommendation}><span>•</span> {recommendation}</div>)}
-            </div> : <EmptyState onAction={() => setView('prediction')} action="Analyze health">No health alerts or recommendations yet.</EmptyState>}
-          </section>}
-
           {view === 'reports' && <section className="glass-panel dashboard-card card-span-2 reports-page-card">
             <div className="panel-row between">
               <div>
@@ -549,7 +618,9 @@ function App() {
                 <fieldset className="profile-avatar-fieldset">
                   <legend>Choose a profile picture</legend>
                   <div className="profile-avatar-options">
-                    {profileAvatars.map((avatar) => (
+                    {profileAvatars
+                      .filter((avatar) => profileForm.gender === '' || avatar.gender === Number(profileForm.gender))
+                      .map((avatar) => (
                       <button
                         key={avatar.id}
                         type="button"
@@ -631,8 +702,8 @@ function App() {
               <>
                 {profileNotice && <p className="profile-form-message success" role="status">{profileNotice}</p>}
                 <div className="profile-panel-inner">
-                  <div className="profile-profile-avatar" aria-label={`${getProfileAvatar(user?.avatar_id).label} profile picture`}>
-                    {getProfileAvatar(user?.avatar_id).emoji}
+                  <div className="profile-profile-avatar" aria-label={`${getProfileAvatar(user?.avatar_id, user?.gender).label} profile picture`}>
+                    {getProfileAvatar(user?.avatar_id, user?.gender).emoji}
                   </div>
                   <div className="profile-info">
                     <h4>{user?.name || 'John Doe'}</h4>

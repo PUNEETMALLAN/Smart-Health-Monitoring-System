@@ -122,31 +122,6 @@ const HealthForm = ({ user, onAnalysisComplete, onPredictionComplete }) => {
               {error && <p className="form-error" role="alert">{error}</p>}
             </form>
 
-            {/* Report Upload integrated into the same card */}
-            <div className="pt-6 border-t border-white/20 space-y-4">
-              <h2 className="text-xl font-semibold text-white">AI Report Analysis</h2>
-              <div className="flex flex-col space-y-4">
-                <div className="flex items-center space-x-4">
-                  <input
-                    type="file"
-                    accept=".pdf,.png,.jpg,.jpeg"
-                    onChange={(e) => {
-                      setFile(e.target.files[0] || null);
-                      setUploadError('');
-                    }}
-                    className="block w-full text-sm text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-white file:text-indigo-600 hover:file:bg-white/90 transition-all cursor-pointer"
-                  />
-                </div>
-                <button
-                  onClick={handleFileUpload}
-                  disabled={uploading || !file}
-                  className="w-full bg-indigo-500 text-white py-3 rounded-xl font-bold shadow-lg hover:bg-indigo-600 active:scale-95 transition-all duration-200 disabled:opacity-70"
-                >
-                  {uploading ? 'Analyzing Report...' : 'Upload & Analyze Report'}
-                </button>
-                {uploadError && <p className="form-error" role="alert">{uploadError}</p>}
-              </div>
-            </div>
           </div>
         </div>
 
@@ -166,6 +141,29 @@ const HealthForm = ({ user, onAnalysisComplete, onPredictionComplete }) => {
               Enter your health parameters or upload a report to see your risk prediction.
             </div>
           )}
+
+          <section className="prediction-report-panel">
+            <h2 className="text-xl font-semibold text-white">AI Report Analysis</h2>
+            <input
+              type="file"
+              accept=".pdf,.png,.jpg,.jpeg"
+              onChange={(e) => {
+                setFile(e.target.files[0] || null);
+                setUploadError('');
+              }}
+              aria-label="Choose a health report"
+              className="block w-full text-sm text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-white file:text-indigo-600 hover:file:bg-white/90 transition-all cursor-pointer"
+            />
+            <button
+              type="button"
+              onClick={handleFileUpload}
+              disabled={uploading || !file}
+              className="w-full bg-indigo-500 text-white py-3 rounded-xl font-bold shadow-lg hover:bg-indigo-600 active:scale-95 transition-all duration-200 disabled:opacity-70"
+            >
+              {uploading ? 'Analyzing Report...' : 'Upload & Analyze Report'}
+            </button>
+            {uploadError && <p className="form-error" role="alert">{uploadError}</p>}
+          </section>
 
           <div className="p-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-2xl text-white text-xs leading-relaxed">
             <strong className="font-bold">Disclaimer:</strong> This tool provides AI-assisted risk prediction based on the data provided.
